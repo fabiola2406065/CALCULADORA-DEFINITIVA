@@ -138,6 +138,15 @@ button{
   color:var(--rojo);
 }
 
+.big.alt{
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.25);
+}
+
+.big.alt .price{
+  color:#fff;
+}
+
 .tiny{
   font-size:11px;
   color:#aaa;
@@ -203,12 +212,14 @@ footer{
 </footer>
 
 <script>
-const MARGEN = 0.60;
+// Márgenes
+const MARGEN_MINIMO = 0.60;   // 60%
+const MARGEN_RECOMENDADO = 2.50; // 250%
 
 // costos por gramo
-const SIL_G = 840 / 910;   // silicona A+B
-const SL_G  = 590 / 490;   // slacker
-const GLATZAN = 3.16 * 5;  // uso fijo
+const SIL_G = 840 / 910;
+const SL_G  = 590 / 490;
+const GLATZAN = 3.16 * 5;
 
 const mxn = n => n.toLocaleString('es-MX',{style:'currency',currency:'MXN'});
 const f2 = n => Number(n).toFixed(2);
@@ -220,7 +231,9 @@ function showTab(i){
 }
 
 function render(cost, breakdownHtml){
-  const venta = cost * (1 + MARGEN);
+  const precioMin = cost * (1 + MARGEN_MINIMO);
+  const precioRec = cost * (1 + MARGEN_RECOMENDADO);
+
   return `
     <div class="note">
       El precio sugerido incluye empaque, tiempo de trabajo y demás.
@@ -231,12 +244,18 @@ function render(cost, breakdownHtml){
     <table class="tbl">
       <tr><th>Concepto</th><th>Monto</th></tr>
       <tr><td>Costo real</td><td>${mxn(cost)}</td></tr>
-      <tr><td>Margen aplicado</td><td>${(MARGEN*100).toFixed(0)}%</td></tr>
+      <tr><td>Margen mínimo aplicado</td><td>60%</td></tr>
+      <tr><td>Margen recomendado aplicado</td><td>250%</td></tr>
     </table>
 
     <div class="big">
-      <div>Precio sugerido de venta</div>
-      <div class="price">${mxn(venta)}</div>
+      <div>Precio mínimo de venta</div>
+      <div class="price">${mxn(precioMin)}</div>
+    </div>
+
+    <div class="big alt">
+      <div>Precio recomendado de venta</div>
+      <div class="price">${mxn(precioRec)}</div>
     </div>
 
     <div class="tiny">
@@ -256,13 +275,9 @@ function calcUltracal(){
   const total = u * 0.7;
   const part = total / 3;
 
-  const A = part;
-  const B = part;
-  const S = part;
-
   const cost =
-    ((A + B) * SIL_G) +
-    (S * SL_G) +
+    ((part * 2) * SIL_G) +
+    (part * SL_G) +
     GLATZAN;
 
   const breakdownHtml = `
@@ -270,13 +285,13 @@ function calcUltracal(){
       <tr><th>Material</th><th>Cantidad</th><th>Costo</th></tr>
       <tr>
         <td>Silicona A/B</td>
-        <td>${f2(A+B)} g <span style="color:#bbb;font-size:12px;">(A: ${f2(A)} · B: ${f2(B)})</span></td>
-        <td>${mxn((A+B)*SIL_G)}</td>
+        <td>${f2(part*2)} g</td>
+        <td>${mxn((part*2)*SIL_G)}</td>
       </tr>
       <tr>
         <td>Slacker</td>
-        <td>${f2(S)} g</td>
-        <td>${mxn(S*SL_G)}</td>
+        <td>${f2(part)} g</td>
+        <td>${mxn(part*SL_G)}</td>
       </tr>
       <tr>
         <td>Glatzan</td>
@@ -309,7 +324,7 @@ function calcManual(){
       <tr><th>Material</th><th>Cantidad</th><th>Costo</th></tr>
       <tr>
         <td>Silicona A/B</td>
-        <td>${f2(A+B)} g <span style="color:#bbb;font-size:12px;">(A: ${f2(A)} · B: ${f2(B)})</span></td>
+        <td>${f2(A+B)} g</td>
         <td>${mxn((A+B)*SIL_G)}</td>
       </tr>
       <tr>
@@ -331,3 +346,4 @@ function calcManual(){
 
 </body>
 </html>
+
