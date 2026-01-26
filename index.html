@@ -175,21 +175,21 @@ footer{
 <div class="panel">
 
   <div class="tabs">
-    <div class="tab active" onclick="showTab(0)">Por Ultracal</div>
+    <div class="tab active" onclick="showTab(0)">Por escultura</div>
     <div class="tab" onclick="showTab(1)">Por material usado</div>
   </div>
 
-  <!-- TAB ULTRACAL -->
+  <!-- TAB ESCULTURA -->
   <div class="section active">
-    <label>Peso del molde de Ultracal (g)</label>
-    <input id="ultracal" placeholder="Coloca aquí">
-    <button onclick="calcUltracal()">Calcular</button>
+    <label>Peso de escultura (g)</label>
+    <input id="escultura" placeholder="Coloca aquí">
+    <button onclick="calcEscultura()">Calcular</button>
   </div>
 
   <!-- TAB MANUAL -->
   <div class="section">
     <div class="note">
-      Recomendado cuando el molde se repite o se utiliza material extra.
+      Recomendado cuando la pieza se repite o se utiliza material extra.
     </div>
 
     <label>Gramos usados de Silicona A</label>
@@ -213,13 +213,17 @@ footer{
 
 <script>
 // Márgenes
-const MARGEN_MINIMO = 0.60;   // 60%
+const MARGEN_MINIMO = 0.60;     // 60%
 const MARGEN_RECOMENDADO = 2.50; // 250%
 
 // costos por gramo
 const SIL_G = 840 / 910;
 const SL_G  = 590 / 490;
-const GLATZAN = 3.16 * 5;
+
+// Glatzan fijo por pieza
+const GLATZAN_ML = 15;
+const COSTO_GLATZAN_ML = 3.16;
+const GLATZAN = GLATZAN_ML * COSTO_GLATZAN_ML;
 
 const mxn = n => n.toLocaleString('es-MX',{style:'currency',currency:'MXN'});
 const f2 = n => Number(n).toFixed(2);
@@ -265,14 +269,14 @@ function render(cost, breakdownHtml){
   `;
 }
 
-function calcUltracal(){
-  const u = parseFloat(ultracal.value);
-  if(!u || u <= 0){
+function calcEscultura(){
+  const e = parseFloat(escultura.value);
+  if(!e || e <= 0){
     res.innerHTML = "⚠️ Ingresa un número válido (en gramos).";
     return;
   }
 
-  const total = u * 0.7;
+  const total = e * 0.7;
   const part = total / 3;
 
   const cost =
@@ -295,7 +299,7 @@ function calcUltracal(){
       </tr>
       <tr>
         <td>Glatzan</td>
-        <td>5.0 ml</td>
+        <td>${GLATZAN_ML} ml</td>
         <td>${mxn(GLATZAN)}</td>
       </tr>
     </table>
@@ -334,7 +338,7 @@ function calcManual(){
       </tr>
       <tr>
         <td>Glatzan</td>
-        <td>5.0 ml</td>
+        <td>${GLATZAN_ML} ml</td>
         <td>${mxn(GLATZAN)}</td>
       </tr>
     </table>
@@ -346,4 +350,3 @@ function calcManual(){
 
 </body>
 </html>
-
