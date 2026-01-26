@@ -6,24 +6,45 @@
 <title>Calculadora BOA FX</title>
 
 <style>
-:root {
+:root{
   --rojo:#e50914;
   --gris:#1a1a1a;
   --gris2:#2b2b2b;
-  --blanco:#fff;
+  --blanco:#ffffff;
 }
 
-*{box-sizing:border-box;font-family:Poppins,sans-serif}
+*{
+  box-sizing:border-box;
+  font-family:'Poppins',sans-serif;
+}
 
 body{
-  margin:0;background:#000;color:#fff;
-  display:flex;flex-direction:column;align-items:center;
+  margin:0;
+  background:#000;
+  color:var(--blanco);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
   padding:30px 15px;
+  min-height:100vh;
+}
+
+img.logo{
+  width:180px;
+  max-width:60%;
+  margin-bottom:25px;
+  animation:fadeIn 1s ease-out;
+}
+
+@keyframes fadeIn{
+  from{opacity:0;transform:translateY(-10px);}
+  to{opacity:1;transform:translateY(0);}
 }
 
 .panel{
   background:var(--gris);
-  width:100%;max-width:480px;
+  width:100%;
+  max-width:480px;
   border-radius:14px;
   padding:22px;
   box-shadow:0 0 20px rgba(229,9,20,.35);
@@ -52,12 +73,18 @@ body{
   color:#fff;
 }
 
-.section{display:none}
-.section.active{display:block}
+.section{display:none;}
+.section.active{display:block;}
 
-label{display:block;margin-bottom:6px}
+label{
+  display:block;
+  margin-bottom:6px;
+  font-weight:500;
+}
+
 input{
-  width:100%;padding:12px;
+  width:100%;
+  padding:12px;
   border-radius:8px;
   border:1px solid var(--rojo);
   background:var(--gris2);
@@ -94,6 +121,7 @@ button{
 .tbl th,.tbl td{
   padding:8px;
   border-bottom:1px solid rgba(255,255,255,.1);
+  text-align:left;
 }
 
 .big{
@@ -121,10 +149,19 @@ button{
   color:#ccc;
   margin-bottom:10px;
 }
+
+footer{
+  margin-top:30px;
+  font-size:12px;
+  color:#777;
+  text-align:center;
+}
 </style>
 </head>
 
 <body>
+
+<img src="logo boa fx.png" alt="BOA FX" class="logo">
 
 <div class="panel">
 
@@ -133,24 +170,23 @@ button{
     <div class="tab" onclick="showTab(1)">Por material usado</div>
   </div>
 
-  <!-- TAB 1 -->
+  <!-- TAB ULTRACAL -->
   <div class="section active">
     <label>Peso del molde de Ultracal (g)</label>
     <input id="ultracal" placeholder="Coloca aquí">
-
     <button onclick="calcUltracal()">Calcular</button>
   </div>
 
-  <!-- TAB 2 -->
+  <!-- TAB MANUAL -->
   <div class="section">
     <div class="note">
-      Recomendado cuando el molde se repite o hay consumo extra de material.
+      Recomendado cuando el molde se repite o se utiliza material extra.
     </div>
 
-    <label>Gramos usados de A</label>
+    <label>Gramos usados de Silicona A</label>
     <input id="a">
 
-    <label>Gramos usados de B</label>
+    <label>Gramos usados de Silicona B</label>
     <input id="b">
 
     <label>Gramos usados de Slacker</label>
@@ -162,13 +198,19 @@ button{
   <div id="res" class="resultado"></div>
 </div>
 
+<footer>
+  © 2025 BOA FX — Cálculo estimado de materiales
+</footer>
+
 <script>
 const MARGEN = 0.45;
-const SIL_G = 840/910;
-const SL_G = 590/490;
-const GLATZAN = 3.16*5;
 
-const mxn=n=>n.toLocaleString('es-MX',{style:'currency',currency:'MXN'});
+// costos por gramo
+const SIL_G = 840 / 910;   // silicona A+B
+const SL_G  = 590 / 490;   // slacker
+const GLATZAN = 3.16 * 5;  // uso fijo
+
+const mxn = n => n.toLocaleString('es-MX',{style:'currency',currency:'MXN'});
 
 function showTab(i){
   document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active',i===j));
@@ -177,47 +219,48 @@ function showTab(i){
 }
 
 function render(cost){
-  const venta = cost*(1+MARGEN);
+  const venta = cost * (1 + MARGEN);
   return `
-  <table class="tbl">
-    <tr><th>Concepto</th><th>Monto</th></tr>
-    <tr><td>Costo real</td><td>${mxn(cost)}</td></tr>
-    <tr><td>Margen aplicado</td><td>${(MARGEN*100).toFixed(0)}%</td></tr>
-  </table>
+    <table class="tbl">
+      <tr><th>Concepto</th><th>Monto</th></tr>
+      <tr><td>Costo real</td><td>${mxn(cost)}</td></tr>
+      <tr><td>Margen aplicado</td><td>${(MARGEN*100).toFixed(0)}%</td></tr>
+    </table>
 
-  <div class="big">
-    <div>Precio sugerido</div>
-    <div class="price">${mxn(venta)}</div>
-  </div>
+    <div class="big">
+      <div>Precio sugerido de venta</div>
+      <div class="price">${mxn(venta)}</div>
+    </div>
 
-  <div class="tiny">
-    Vender a este precio o menos resultará en una pérdida neta de su tiempo y esfuerzo. No acepte menos de lo que merece
-  </div>`;
+    <div class="tiny">
+      Vender a este precio o menos resultará en una pérdida neta de su tiempo y esfuerzo. No acepte menos de lo que merece
+    </div>
+  `;
 }
 
 function calcUltracal(){
   const u = parseFloat(ultracal.value);
-  if(!u||u<=0) return;
+  if(!u || u <= 0) return;
 
-  const total = u*0.7;
-  const part = total/3;
+  const total = u * 0.7;
+  const part = total / 3;
 
   const cost =
-    (part*2)*SIL_G +
-    (part)*SL_G +
+    ((part * 2) * SIL_G) +
+    (part * SL_G) +
     GLATZAN;
 
   res.innerHTML = render(cost);
 }
 
 function calcManual(){
-  const A=parseFloat(a.value)||0;
-  const B=parseFloat(b.value)||0;
-  const S=parseFloat(s.value)||0;
+  const A = parseFloat(a.value) || 0;
+  const B = parseFloat(b.value) || 0;
+  const S = parseFloat(s.value) || 0;
 
   const cost =
-    ((A+B)*SIL_G) +
-    (S*SL_G) +
+    ((A + B) * SIL_G) +
+    (S * SL_G) +
     GLATZAN;
 
   res.innerHTML = render(cost);
