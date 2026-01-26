@@ -48,7 +48,7 @@
       padding: 25px;
       border-radius: 12px;
       width: 100%;
-      max-width: 420px;
+      max-width: 460px;
       box-shadow: 0 0 20px rgba(229, 9, 20, 0.3);
     }
 
@@ -98,14 +98,108 @@
       background-color: var(--gris-claro);
       border-left: 4px solid var(--rojo);
       border-radius: 8px;
-      padding: 20px;
-      font-size: 15px;
-      line-height: 1.6;
-      white-space: pre-line;
+      padding: 18px;
+      font-size: 14px;
+      line-height: 1.5;
     }
 
-    .resultado b {
+    .nota {
+      margin-top: 12px;
+      font-size: 12px;
+      color: #b8b8b8;
+      line-height: 1.4;
+    }
+
+    .tiny {
+      margin-top: 10px;
+      font-size: 11px;
+      color: #9a9a9a;
+      line-height: 1.35;
+    }
+
+    .tbl {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      overflow: hidden;
+      border-radius: 10px;
+    }
+
+    .tbl th, .tbl td {
+      padding: 10px 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .tbl th {
+      font-size: 12px;
+      color: #d8d8d8;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+
+    .tbl td {
+      font-size: 13px;
+      color: #f1f1f1;
+    }
+
+    .tbl .muted {
+      color: #c7c7c7;
+      font-size: 12px;
+    }
+
+    .summary {
+      margin-top: 14px;
+      background: rgba(0,0,0,0.25);
+      border: 1px solid rgba(229, 9, 20, 0.35);
+      border-radius: 12px;
+      padding: 14px;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 6px 0;
+      border-bottom: 1px dashed rgba(255,255,255,0.08);
+    }
+
+    .row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .k {
+      color: #dcdcdc;
+      font-size: 13px;
+    }
+
+    .v {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .bigPrice {
+      margin-top: 8px;
+      padding: 12px;
+      border-radius: 12px;
+      background: rgba(229, 9, 20, 0.12);
+      border: 1px solid rgba(229, 9, 20, 0.45);
+    }
+
+    .bigPrice .label {
+      font-size: 12px;
+      color: #ffd0d3;
+      letter-spacing: 0.2px;
+      margin-bottom: 4px;
+    }
+
+    .bigPrice .amount {
+      font-size: 22px;
+      font-weight: 800;
       color: var(--rojo);
+      line-height: 1.1;
     }
 
     footer {
@@ -121,9 +215,9 @@
     }
 
     @media (max-width: 480px) {
-      h1 { font-size: 1.3rem; }
+      h1 { font-size: 1.25rem; }
       .panel { padding: 20px; }
-      button { font-size: 15px; }
+      .bigPrice .amount { font-size: 20px; }
     }
   </style>
 </head>
@@ -132,11 +226,13 @@
   <h1>Calculadora de Costos</h1>
 
   <div class="panel">
-    <label for="silicona">¿Cuánta silicona A/B usaste? (en gramos)</label>
-    <input id="silicona" type="number" min="0" step="0.01" placeholder="Ejemplo: 250" />
-
-    <label for="slacker">¿Cuánto Slacker usaste? (en gramos)</label>
-    <input id="slacker" type="number" min="0" step="0.01" placeholder="Ejemplo: 20" />
+    <label for="porParte">
+      ¿Cuántos gramos usaste por parte? (A, B y Slacker)
+      <span style="display:block; font-size:12px; color:#c9c9c9; margin-top:4px;">
+        Ejemplo: si usaste 32g de A + 32g de B + 32g de Slacker, escribe <b>32</b>.
+      </span>
+    </label>
+    <input id="porParte" type="number" min="0" step="0.01" placeholder="Ejemplo: 32" />
 
     <button onclick="calcularCosto()">Calcular</button>
 
@@ -168,79 +264,121 @@
           osc.stop();
           ctx.close();
         }, 120);
-      } catch (e) {
-        // si el navegador bloquea audio, no hacemos nada
-      }
+      } catch (e) {}
     }
 
-    // ---- CÁLCULO ----
     function calcularCosto() {
       beep();
 
-      // Tus costos reales (para sacar precio por gramo)
+      // ====== CONFIG ======
+      const MARGEN_GANANCIA = 0.45; // 45%
+
+      // Silicona A+B (kit completo)
       const SILICONA_COSTO_TOTAL = 840;   // MXN
       const SILICONA_PESO_TOTAL_G = 910;  // 0.91 kg = 910 g
+      const COSTO_SILICONA_G = SILICONA_COSTO_TOTAL / SILICONA_PESO_TOTAL_G;
 
+      // Slacker
       const SLACKER_COSTO_TOTAL = 590;    // MXN
       const SLACKER_PESO_TOTAL_G = 490;   // g
+      const COSTO_SLACKER_G = SLACKER_COSTO_TOTAL / SLACKER_PESO_TOTAL_G;
 
-      // Otros materiales (los dejo igual que tu versión original)
+      // Otros materiales (como tu versión original)
       const COSTO_ULTRACAL_KG = 36.08;
       const COSTO_GLATZAN_ML = 3.16;
-
       const ULTRACAL_CANTIDAD_KG = 1.5;
       const GLATZAN_CANTIDAD_ML = 5.0;
 
-      const MARGEN_GANANCIA = 0.40;
-
-      // Costo por gramo
-      const COSTO_SILICONA_G = SILICONA_COSTO_TOTAL / SILICONA_PESO_TOTAL_G;
-      const COSTO_SLACKER_G = SLACKER_COSTO_TOTAL / SLACKER_PESO_TOTAL_G;
-
-      // Inputs
-      const siliconaUsadaG = parseFloat(document.getElementById("silicona").value);
-      const slackerUsadoG = parseFloat(document.getElementById("slacker").value);
+      // ====== INPUT ======
+      const porParte = parseFloat(document.getElementById("porParte").value);
       const resultado = document.getElementById("resultado");
 
-      // Validación
-      const siliconaValida = !isNaN(siliconaUsadaG) && siliconaUsadaG >= 0;
-      const slackerValido = !isNaN(slackerUsadoG) && slackerUsadoG >= 0;
-
-      if (!siliconaValida || !slackerValido || (siliconaUsadaG === 0 && slackerUsadoG === 0)) {
-        resultado.textContent = "⚠️ Ingresa valores válidos (en gramos). Al menos uno debe ser mayor a 0.";
+      if (isNaN(porParte) || porParte <= 0) {
+        resultado.textContent = "⚠️ Ingresa un número válido (en gramos). Ejemplo: 32";
         return;
       }
 
-      // Costos
-      const costoSilicona = siliconaUsadaG * COSTO_SILICONA_G;
-      const costoSlacker = slackerUsadoG * COSTO_SLACKER_G;
+      // ====== CANTIDADES DERIVADAS ======
+      // Si escribes 32, se asume:
+      // A = 32g, B = 32g, Slacker = 32g
+      const A_g = porParte;
+      const B_g = porParte;
+      const slacker_g = porParte;
+
+      // Silicona total consumida (A+B)
+      const siliconaTotal_g = A_g + B_g;
+
+      // ====== COSTOS ======
+      const costoSilicona = siliconaTotal_g * COSTO_SILICONA_G;
+      const costoSlacker = slacker_g * COSTO_SLACKER_G;
 
       const costoUltracal = ULTRACAL_CANTIDAD_KG * COSTO_ULTRACAL_KG;
       const costoGlatzan = GLATZAN_CANTIDAD_ML * COSTO_GLATZAN_ML;
 
       const costoTotal = costoSilicona + costoSlacker + costoUltracal + costoGlatzan;
-      const precioFinal = costoTotal * (1 + MARGEN_GANANCIA);
+      const precioSugerido = costoTotal * (1 + MARGEN_GANANCIA);
 
-      // Helper formato moneda
+      // formato MXN
       const mxn = (n) => n.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
 
       resultado.innerHTML = `
-<b>Materiales utilizados:</b>
-Silicona A/B: ${siliconaUsadaG.toFixed(2)} g  (≈ ${mxn(costoSilicona)})
-Slacker: ${slackerUsadoG.toFixed(2)} g  (≈ ${mxn(costoSlacker)})
-Ultracal (Molde): ${ULTRACAL_CANTIDAD_KG.toFixed(1)} kg  (≈ ${mxn(costoUltracal)})
-Glatzan (Unidad): ${GLATZAN_CANTIDAD_ML.toFixed(1)} ml  (≈ ${mxn(costoGlatzan)})
+        <div class="nota">
+          <b>Nota:</b> El precio sugerido considera el uso de materiales y un margen para contemplar
+          consumibles (embalaje, guantes, herramientas), desgaste, errores, y tiempo de trabajo.
+        </div>
 
-<b>❌ Precio inicial (costo real de materiales):</b> ${mxn(costoTotal)}
-🚨 Vender a este precio o menos resultará en una pérdida neta de su tiempo y esfuerzo. No acepte menos de lo que merece.
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>Material</th>
+              <th>Cantidad</th>
+              <th>Costo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Silicona A/B <div class="muted">(${mxn(COSTO_SILICONA_G)} / g)</div></td>
+              <td>${siliconaTotal_g.toFixed(2)} g <div class="muted">A: ${A_g.toFixed(2)} g · B: ${B_g.toFixed(2)} g</div></td>
+              <td>${mxn(costoSilicona)}</td>
+            </tr>
+            <tr>
+              <td>Slacker <div class="muted">(${mxn(COSTO_SLACKER_G)} / g)</div></td>
+              <td>${slacker_g.toFixed(2)} g</td>
+              <td>${mxn(costoSlacker)}</td>
+            </tr>
+            <tr>
+              <td>Ultracal (Molde)</td>
+              <td>${ULTRACAL_CANTIDAD_KG.toFixed(1)} kg</td>
+              <td>${mxn(costoUltracal)}</td>
+            </tr>
+            <tr>
+              <td>Glatzan</td>
+              <td>${GLATZAN_CANTIDAD_ML.toFixed(1)} ml</td>
+              <td>${mxn(costoGlatzan)}</td>
+            </tr>
+          </tbody>
+        </table>
 
-<b>✅ Precio sugerido:</b>
-Margen aplicado: ${(MARGEN_GANANCIA * 100).toFixed(0)}%
-💰 <b>Precio final sugerido:</b> ${mxn(precioFinal)}
+        <div class="summary">
+          <div class="row">
+            <div class="k">Precio inicial (costo real)</div>
+            <div class="v">${mxn(costoTotal)}</div>
+          </div>
 
-<b>Referencia de costos por gramo:</b>
-Silicona: ${mxn(COSTO_SILICONA_G)} / g
-Slacker: ${mxn(COSTO_SLACKER_G)} / g
+          <div class="row">
+            <div class="k">Margen aplicado</div>
+            <div class="v">${(MARGEN_GANANCIA * 100).toFixed(0)}%</div>
+          </div>
+
+          <div class="bigPrice">
+            <div class="label">Precio sugerido de venta</div>
+            <div class="amount">${mxn(precioSugerido)}</div>
+          </div>
+
+          <div class="tiny">
+            Vender a este precio o menos resultará en una pérdida neta de su tiempo y esfuerzo. No acepte menos de lo que merece
+          </div>
+        </div>
       `;
     }
 
