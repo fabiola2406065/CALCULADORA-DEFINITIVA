@@ -150,17 +150,6 @@ button{
   margin-bottom:10px;
 }
 
-.mix{
-  margin-top:12px;
-  font-size:12px;
-  color:#cfcfcf;
-  line-height:1.45;
-  background:rgba(0,0,0,.22);
-  border:1px solid rgba(255,255,255,.08);
-  padding:10px;
-  border-radius:10px;
-}
-
 footer{
   margin-top:30px;
   font-size:12px;
@@ -214,7 +203,7 @@ footer{
 </footer>
 
 <script>
-const MARGEN = 0.60; // 60%
+const MARGEN = 0.60;
 
 // costos por gramo
 const SIL_G = 840 / 910;   // silicona A+B
@@ -230,11 +219,11 @@ function showTab(i){
   document.getElementById('res').innerHTML='';
 }
 
-function render({cost, mixHtml, breakdownHtml}){
+function render(cost, breakdownHtml){
   const venta = cost * (1 + MARGEN);
   return `
     <div class="note">
-      El precio sugerido considera embalaje, consumibles, desgaste, posibles errores y tiempo de trabajo.
+      El precio sugerido incluye empaque, tiempo de trabajo y demás.
     </div>
 
     ${breakdownHtml}
@@ -250,13 +239,9 @@ function render({cost, mixHtml, breakdownHtml}){
       <div class="price">${mxn(venta)}</div>
     </div>
 
-    <div class="mix">
-      <b>Cálculo de mezcla:</b><br>
-      ${mixHtml}
-    </div>
-
     <div class="tiny">
-      Vender a este precio o menos resultará en una pérdida neta de su tiempo y esfuerzo. No acepte menos de lo que merece
+      Vender a menos de este precio implica una pérdida neta de su tiempo y del esfuerzo invertido para sostener su proyecto de vida.
+      No acepte menos de lo que merece. El envío debe considerarse como un gasto aparte.
     </div>
   `;
 }
@@ -268,7 +253,6 @@ function calcUltracal(){
     return;
   }
 
-  // Tu receta: total = ultracal*0.7 ; por parte = total/3
   const total = u * 0.7;
   const part = total / 3;
 
@@ -302,13 +286,7 @@ function calcUltracal(){
     </table>
   `;
 
-  const mixHtml = `
-    Molde Ultracal: ${f2(u)} g<br>
-    Total (Silicona + Slacker) = ${f2(u)} × 0.7 = ${f2(total)} g<br>
-    Por parte (A, B, Slacker) = ${f2(total)} ÷ 3 = ${f2(part)} g c/u
-  `;
-
-  res.innerHTML = render({cost, mixHtml, breakdownHtml});
+  res.innerHTML = render(cost, breakdownHtml);
 }
 
 function calcManual(){
@@ -316,17 +294,10 @@ function calcManual(){
   const B = parseFloat(b.value);
   const S = parseFloat(s.value);
 
-  const Aok = !isNaN(A) && A >= 0;
-  const Bok = !isNaN(B) && B >= 0;
-  const Sok = !isNaN(S) && S >= 0;
-
-  if(!Aok || !Bok || !Sok || (A===0 && B===0 && S===0)){
+  if([A,B,S].some(v=>isNaN(v)||v<0) || (A===0&&B===0&&S===0)){
     res.innerHTML = "⚠️ Ingresa valores válidos (en gramos).";
     return;
   }
-
-  const total = (A + B + S);
-  const partAvg = total / 3;
 
   const cost =
     ((A + B) * SIL_G) +
@@ -354,22 +325,8 @@ function calcManual(){
     </table>
   `;
 
-  const mixHtml = `
-    Total (Silicona + Slacker) = ${f2(A)} + ${f2(B)} + ${f2(S)} = ${f2(total)} g<br>
-    Por parte (A, B, Slacker) = ${f2(total)} ÷ 3 = ${f2(partAvg)} g c/u
-  `;
-
-  res.innerHTML = render({cost, mixHtml, breakdownHtml});
+  res.innerHTML = render(cost, breakdownHtml);
 }
-
-// Enter para calcular
-document.addEventListener('keydown', (e) => {
-  if(e.key === 'Enter'){
-    const ultracalTabActive = document.querySelectorAll('.section')[0].classList.contains('active');
-    if(ultracalTabActive) calcUltracal();
-    else calcManual();
-  }
-});
 </script>
 
 </body>
