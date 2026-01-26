@@ -150,6 +150,17 @@ button{
   margin-bottom:10px;
 }
 
+.mix{
+  margin-top:12px;
+  font-size:12px;
+  color:#cfcfcf;
+  line-height:1.45;
+  background:rgba(0,0,0,.22);
+  border:1px solid rgba(255,255,255,.08);
+  padding:10px;
+  border-radius:10px;
+}
+
 footer{
   margin-top:30px;
   font-size:12px;
@@ -184,13 +195,13 @@ footer{
     </div>
 
     <label>Gramos usados de Silicona A</label>
-    <input id="a">
+    <input id="a" placeholder="Coloca aquí">
 
     <label>Gramos usados de Silicona B</label>
-    <input id="b">
+    <input id="b" placeholder="Coloca aquí">
 
     <label>Gramos usados de Slacker</label>
-    <input id="s">
+    <input id="s" placeholder="Coloca aquí">
 
     <button onclick="calcManual()">Calcular</button>
   </div>
@@ -203,7 +214,7 @@ footer{
 </footer>
 
 <script>
-const MARGEN = 0.45;
+const MARGEN = 0.60; // 60%
 
 // costos por gramo
 const SIL_G = 840 / 910;   // silicona A+B
@@ -211,6 +222,7 @@ const SL_G  = 590 / 490;   // slacker
 const GLATZAN = 3.16 * 5;  // uso fijo
 
 const mxn = n => n.toLocaleString('es-MX',{style:'currency',currency:'MXN'});
+const f2 = n => Number(n).toFixed(2);
 
 function showTab(i){
   document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active',i===j));
@@ -218,9 +230,15 @@ function showTab(i){
   document.getElementById('res').innerHTML='';
 }
 
-function render(cost){
+function render({cost, mixHtml, breakdownHtml}){
   const venta = cost * (1 + MARGEN);
   return `
+    <div class="note">
+      El precio sugerido considera embalaje, consumibles, desgaste, posibles errores y tiempo de trabajo.
+    </div>
+
+    ${breakdownHtml}
+
     <table class="tbl">
       <tr><th>Concepto</th><th>Monto</th></tr>
       <tr><td>Costo real</td><td>${mxn(cost)}</td></tr>
@@ -232,6 +250,11 @@ function render(cost){
       <div class="price">${mxn(venta)}</div>
     </div>
 
+    <div class="mix">
+      <b>Cálculo de mezcla:</b><br>
+      ${mixHtml}
+    </div>
+
     <div class="tiny">
       Vender a este precio o menos resultará en una pérdida neta de su tiempo y esfuerzo. No acepte menos de lo que merece
     </div>
@@ -240,31 +263,113 @@ function render(cost){
 
 function calcUltracal(){
   const u = parseFloat(ultracal.value);
-  if(!u || u <= 0) return;
+  if(!u || u <= 0){
+    res.innerHTML = "⚠️ Ingresa un número válido (en gramos).";
+    return;
+  }
 
+  // Tu receta: total = ultracal*0.7 ; por parte = total/3
   const total = u * 0.7;
   const part = total / 3;
 
-  const cost =
-    ((part * 2) * SIL_G) +
-    (part * SL_G) +
-    GLATZAN;
-
-  res.innerHTML = render(cost);
-}
-
-function calcManual(){
-  const A = parseFloat(a.value) || 0;
-  const B = parseFloat(b.value) || 0;
-  const S = parseFloat(s.value) || 0;
+  const A = part;
+  const B = part;
+  const S = part;
 
   const cost =
     ((A + B) * SIL_G) +
     (S * SL_G) +
     GLATZAN;
 
-  res.innerHTML = render(cost);
+  const breakdownHtml = `
+    <table class="tbl">
+      <tr><th>Material</th><th>Cantidad</th><th>Costo</th></tr>
+      <tr>
+        <td>Silicona A/B</td>
+        <td>${f2(A+B)} g <span style="color:#bbb;font-size:12px;">(A: ${f2(A)} · B: ${f2(B)})</span></td>
+        <td>${mxn((A+B)*SIL_G)}</td>
+      </tr>
+      <tr>
+        <td>Slacker</td>
+        <td>${f2(S)} g</td>
+        <td>${mxn(S*SL_G)}</td>
+      </tr>
+      <tr>
+        <td>Glatzan</td>
+        <td>5.0 ml</td>
+        <td>${mxn(GLATZAN)}</td>
+      </tr>
+    </table>
+  `;
+
+  const mixHtml = `
+    Molde Ultracal: ${f2(u)} g<br>
+    Total (Silicona + Slacker) = ${f2(u)} × 0.7 = ${f2(total)} g<br>
+    Por parte (A, B, Slacker) = ${f2(total)} ÷ 3 = ${f2(part)} g c/u
+  `;
+
+  res.innerHTML = render({cost, mixHtml, breakdownHtml});
 }
+
+function calcManual(){
+  const A = parseFloat(a.value);
+  const B = parseFloat(b.value);
+  const S = parseFloat(s.value);
+
+  const Aok = !isNaN(A) && A >= 0;
+  const Bok = !isNaN(B) && B >= 0;
+  const Sok = !isNaN(S) && S >= 0;
+
+  if(!Aok || !Bok || !Sok || (A===0 && B===0 && S===0)){
+    res.innerHTML = "⚠️ Ingresa valores válidos (en gramos).";
+    return;
+  }
+
+  const total = (A + B + S);
+  const partAvg = total / 3;
+
+  const cost =
+    ((A + B) * SIL_G) +
+    (S * SL_G) +
+    GLATZAN;
+
+  const breakdownHtml = `
+    <table class="tbl">
+      <tr><th>Material</th><th>Cantidad</th><th>Costo</th></tr>
+      <tr>
+        <td>Silicona A/B</td>
+        <td>${f2(A+B)} g <span style="color:#bbb;font-size:12px;">(A: ${f2(A)} · B: ${f2(B)})</span></td>
+        <td>${mxn((A+B)*SIL_G)}</td>
+      </tr>
+      <tr>
+        <td>Slacker</td>
+        <td>${f2(S)} g</td>
+        <td>${mxn(S*SL_G)}</td>
+      </tr>
+      <tr>
+        <td>Glatzan</td>
+        <td>5.0 ml</td>
+        <td>${mxn(GLATZAN)}</td>
+      </tr>
+    </table>
+  `;
+
+  const mixHtml = `
+    Total (Silicona + Slacker) = ${f2(A)} + ${f2(B)} + ${f2(S)} = ${f2(total)} g<br>
+    Por parte (A, B, Slacker) = ${f2(total)} ÷ 3 = ${f2(partAvg)} g c/u
+  `;
+
+  res.innerHTML = render({cost, mixHtml, breakdownHtml});
+}
+
+// Enter para calcular
+document.addEventListener('keydown', (e) => {
+  if(e.key === 'Enter'){
+    const ultracalTabActive = document.querySelectorAll('.section')[0].classList.contains('active');
+    if(ultracalTabActive) calcUltracal();
+    else calcManual();
+  }
+});
 </script>
 
 </body>
