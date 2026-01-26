@@ -1,386 +1,228 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Calculadora de Costos | BOA FX</title>
-  <style>
-    :root {
-      --rojo: #e50914;
-      --blanco: #ffffff;
-      --gris: #1a1a1a;
-      --gris-claro: #2b2b2b;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora BOA FX</title>
 
-    * {
-      box-sizing: border-box;
-      font-family: 'Poppins', sans-serif;
-    }
+<style>
+:root {
+  --rojo:#e50914;
+  --gris:#1a1a1a;
+  --gris2:#2b2b2b;
+  --blanco:#fff;
+}
 
-    body {
-      margin: 0;
-      background-color: #000;
-      color: var(--blanco);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      min-height: 100vh;
-      padding: 30px 15px;
-    }
+*{box-sizing:border-box;font-family:Poppins,sans-serif}
 
-    img.logo {
-      width: 180px;
-      max-width: 60%;
-      margin-bottom: 25px;
-      animation: fadeIn 1s ease-out;
-    }
+body{
+  margin:0;background:#000;color:#fff;
+  display:flex;flex-direction:column;align-items:center;
+  padding:30px 15px;
+}
 
-    h1 {
-      color: var(--rojo);
-      text-align: center;
-      margin-bottom: 25px;
-      letter-spacing: 1px;
-    }
+.panel{
+  background:var(--gris);
+  width:100%;max-width:480px;
+  border-radius:14px;
+  padding:22px;
+  box-shadow:0 0 20px rgba(229,9,20,.35);
+}
 
-    .panel {
-      background-color: var(--gris);
-      padding: 25px;
-      border-radius: 12px;
-      width: 100%;
-      max-width: 460px;
-      box-shadow: 0 0 20px rgba(229, 9, 20, 0.3);
-    }
+.tabs{
+  display:flex;
+  margin-bottom:18px;
+  border-radius:10px;
+  overflow:hidden;
+}
 
-    label {
-      display: block;
-      margin-bottom: 8px;
-      color: var(--blanco);
-      font-weight: 500;
-    }
+.tab{
+  flex:1;
+  padding:10px;
+  text-align:center;
+  cursor:pointer;
+  background:#111;
+  font-size:13px;
+  font-weight:600;
+  color:#ccc;
+}
 
-    input {
-      width: 100%;
-      padding: 12px;
-      border-radius: 8px;
-      border: 1px solid var(--rojo);
-      background-color: var(--gris-claro);
-      color: var(--blanco);
-      font-size: 16px;
-      outline: none;
-      margin-bottom: 15px;
-    }
+.tab.active{
+  background:var(--rojo);
+  color:#fff;
+}
 
-    input:focus {
-      border-color: var(--blanco);
-    }
+.section{display:none}
+.section.active{display:block}
 
-    button {
-      width: 100%;
-      background-color: var(--rojo);
-      color: var(--blanco);
-      border: none;
-      border-radius: 8px;
-      padding: 14px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.3s, transform 0.2s;
-    }
+label{display:block;margin-bottom:6px}
+input{
+  width:100%;padding:12px;
+  border-radius:8px;
+  border:1px solid var(--rojo);
+  background:var(--gris2);
+  color:#fff;
+  margin-bottom:14px;
+}
 
-    button:hover {
-      background-color: #ff1a1a;
-      transform: scale(1.02);
-    }
+button{
+  width:100%;
+  background:var(--rojo);
+  border:none;
+  color:#fff;
+  padding:14px;
+  border-radius:8px;
+  font-weight:700;
+  cursor:pointer;
+}
 
-    .resultado {
-      margin-top: 25px;
-      background-color: var(--gris-claro);
-      border-left: 4px solid var(--rojo);
-      border-radius: 8px;
-      padding: 18px;
-      font-size: 14px;
-      line-height: 1.5;
-    }
+.resultado{
+  margin-top:20px;
+  background:var(--gris2);
+  padding:16px;
+  border-left:4px solid var(--rojo);
+  border-radius:10px;
+  font-size:13px;
+}
 
-    .nota {
-      margin-top: 12px;
-      font-size: 12px;
-      color: #b8b8b8;
-      line-height: 1.4;
-    }
+.tbl{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:10px;
+}
 
-    .tiny {
-      margin-top: 10px;
-      font-size: 11px;
-      color: #9a9a9a;
-      line-height: 1.35;
-    }
+.tbl th,.tbl td{
+  padding:8px;
+  border-bottom:1px solid rgba(255,255,255,.1);
+}
 
-    .tbl {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-      overflow: hidden;
-      border-radius: 10px;
-    }
+.big{
+  margin-top:12px;
+  background:rgba(229,9,20,.15);
+  border:1px solid rgba(229,9,20,.4);
+  padding:12px;
+  border-radius:10px;
+}
 
-    .tbl th, .tbl td {
-      padding: 10px 10px;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-      text-align: left;
-      vertical-align: top;
-    }
+.big .price{
+  font-size:22px;
+  font-weight:800;
+  color:var(--rojo);
+}
 
-    .tbl th {
-      font-size: 12px;
-      color: #d8d8d8;
-      font-weight: 600;
-      letter-spacing: 0.3px;
-    }
+.tiny{
+  font-size:11px;
+  color:#aaa;
+  margin-top:8px;
+}
 
-    .tbl td {
-      font-size: 13px;
-      color: #f1f1f1;
-    }
-
-    .tbl .muted {
-      color: #c7c7c7;
-      font-size: 12px;
-    }
-
-    .summary {
-      margin-top: 14px;
-      background: rgba(0,0,0,0.25);
-      border: 1px solid rgba(229, 9, 20, 0.35);
-      border-radius: 12px;
-      padding: 14px;
-    }
-
-    .row {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 6px 0;
-      border-bottom: 1px dashed rgba(255,255,255,0.08);
-    }
-
-    .row:last-child {
-      border-bottom: none;
-      padding-bottom: 0;
-    }
-
-    .k {
-      color: #dcdcdc;
-      font-size: 13px;
-    }
-
-    .v {
-      font-size: 13px;
-      font-weight: 600;
-    }
-
-    .bigPrice {
-      margin-top: 8px;
-      padding: 12px;
-      border-radius: 12px;
-      background: rgba(229, 9, 20, 0.12);
-      border: 1px solid rgba(229, 9, 20, 0.45);
-    }
-
-    .bigPrice .label {
-      font-size: 12px;
-      color: #ffd0d3;
-      letter-spacing: 0.2px;
-      margin-bottom: 4px;
-    }
-
-    .bigPrice .amount {
-      font-size: 22px;
-      font-weight: 800;
-      color: var(--rojo);
-      line-height: 1.1;
-    }
-
-    footer {
-      margin-top: 30px;
-      font-size: 12px;
-      color: #777;
-      text-align: center;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @media (max-width: 480px) {
-      h1 { font-size: 1.25rem; }
-      .panel { padding: 20px; }
-      .bigPrice .amount { font-size: 20px; }
-    }
-  </style>
+.note{
+  font-size:12px;
+  color:#ccc;
+  margin-bottom:10px;
+}
+</style>
 </head>
+
 <body>
-  <img src="logo boa fx.png" alt="BOA FX" class="logo" />
-  <h1>Calculadora de Costos</h1>
 
-  <div class="panel">
-    <label for="ultracalMoldeG">
-      Peso del molde de Ultracal (en gramos):
-    </label>
-    <input id="ultracalMoldeG" type="number" min="0" step="0.01" placeholder="Coloca aquí" />
+<div class="panel">
 
-    <button onclick="calcularCosto()">Calcular</button>
-
-    <div id="resultado" class="resultado"></div>
+  <div class="tabs">
+    <div class="tab active" onclick="showTab(0)">Por Ultracal</div>
+    <div class="tab" onclick="showTab(1)">Por material usado</div>
   </div>
 
-  <footer>© 2025 BOA FX — Cálculo estimado de materiales</footer>
+  <!-- TAB 1 -->
+  <div class="section active">
+    <label>Peso del molde de Ultracal (g)</label>
+    <input id="ultracal" placeholder="Coloca aquí">
 
-  <script>
-    // ---- SONIDO BEEP DIGITAL ----
-    function beep() {
-      try {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (!AudioCtx) return;
+    <button onclick="calcUltracal()">Calcular</button>
+  </div>
 
-        const ctx = new AudioCtx();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
+  <!-- TAB 2 -->
+  <div class="section">
+    <div class="note">
+      Recomendado cuando el molde se repite o hay consumo extra de material.
+    </div>
 
-        osc.type = 'square';
-        osc.frequency.value = 800;
-        gain.gain.value = 0.08;
+    <label>Gramos usados de A</label>
+    <input id="a">
 
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start();
+    <label>Gramos usados de B</label>
+    <input id="b">
 
-        setTimeout(() => {
-          osc.stop();
-          ctx.close();
-        }, 120);
-      } catch (e) {}
-    }
+    <label>Gramos usados de Slacker</label>
+    <input id="s">
 
-    function calcularCosto() {
-      beep();
+    <button onclick="calcManual()">Calcular</button>
+  </div>
 
-      // ====== CONFIG ======
-      const MARGEN_GANANCIA = 0.45; // 45%
+  <div id="res" class="resultado"></div>
+</div>
 
-      // Silicona A+B (kit completo)
-      const SILICONA_COSTO_TOTAL = 840;   // MXN
-      const SILICONA_PESO_TOTAL_G = 910;  // 0.91 kg = 910 g
-      const COSTO_SILICONA_G = SILICONA_COSTO_TOTAL / SILICONA_PESO_TOTAL_G;
+<script>
+const MARGEN = 0.45;
+const SIL_G = 840/910;
+const SL_G = 590/490;
+const GLATZAN = 3.16*5;
 
-      // Slacker
-      const SLACKER_COSTO_TOTAL = 590;    // MXN
-      const SLACKER_PESO_TOTAL_G = 490;   // g
-      const COSTO_SLACKER_G = SLACKER_COSTO_TOTAL / SLACKER_PESO_TOTAL_G;
+const mxn=n=>n.toLocaleString('es-MX',{style:'currency',currency:'MXN'});
 
-      // Glatzan (se mantiene como costo fijo por uso)
-      const COSTO_GLATZAN_ML = 3.16;
-      const GLATZAN_CANTIDAD_ML = 5.0;
+function showTab(i){
+  document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active',i===j));
+  document.querySelectorAll('.section').forEach((s,j)=>s.classList.toggle('active',i===j));
+  document.getElementById('res').innerHTML='';
+}
 
-      // ====== INPUT ======
-      const pesoUltracalMoldeG = parseFloat(document.getElementById("ultracalMoldeG").value);
-      const resultado = document.getElementById("resultado");
+function render(cost){
+  const venta = cost*(1+MARGEN);
+  return `
+  <table class="tbl">
+    <tr><th>Concepto</th><th>Monto</th></tr>
+    <tr><td>Costo real</td><td>${mxn(cost)}</td></tr>
+    <tr><td>Margen aplicado</td><td>${(MARGEN*100).toFixed(0)}%</td></tr>
+  </table>
 
-      if (isNaN(pesoUltracalMoldeG) || pesoUltracalMoldeG <= 0) {
-        resultado.textContent = "⚠️ Ingresa un número válido (en gramos). Ejemplo: 139";
-        return;
-      }
+  <div class="big">
+    <div>Precio sugerido</div>
+    <div class="price">${mxn(venta)}</div>
+  </div>
 
-      // ====== TU FÓRMULA ======
-      // Total (silicona+slacker) = pesoMolde * 0.7
-      // Por parte = (pesoMolde * 0.7) / 3  -> A, B, Slacker
-      const totalMix_g = pesoUltracalMoldeG * 0.7;
-      const porParte_g = totalMix_g / 3;
+  <div class="tiny">
+    Vender a este precio o menos resultará en una pérdida neta de su tiempo y esfuerzo. No acepte menos de lo que merece
+  </div>`;
+}
 
-      const A_g = porParte_g;
-      const B_g = porParte_g;
-      const slacker_g = porParte_g;
+function calcUltracal(){
+  const u = parseFloat(ultracal.value);
+  if(!u||u<=0) return;
 
-      const siliconaTotal_g = A_g + B_g;
+  const total = u*0.7;
+  const part = total/3;
 
-      // ====== COSTOS ======
-      const costoSilicona = siliconaTotal_g * COSTO_SILICONA_G;
-      const costoSlacker = slacker_g * COSTO_SLACKER_G;
+  const cost =
+    (part*2)*SIL_G +
+    (part)*SL_G +
+    GLATZAN;
 
-      const costoGlatzan = GLATZAN_CANTIDAD_ML * COSTO_GLATZAN_ML;
+  res.innerHTML = render(cost);
+}
 
-      const costoTotal = costoSilicona + costoSlacker + costoGlatzan;
-      const precioSugerido = costoTotal * (1 + MARGEN_GANANCIA);
+function calcManual(){
+  const A=parseFloat(a.value)||0;
+  const B=parseFloat(b.value)||0;
+  const S=parseFloat(s.value)||0;
 
-      const mxn = (n) => n.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
+  const cost =
+    ((A+B)*SIL_G) +
+    (S*SL_G) +
+    GLATZAN;
 
-      resultado.innerHTML = `
-        <div class="nota">
-          <b>Nota:</b> El precio sugerido considera embalaje, consumibles, desgaste, posibles errores y tiempo de trabajo.
-        </div>
+  res.innerHTML = render(cost);
+}
+</script>
 
-        <table class="tbl">
-          <thead>
-            <tr>
-              <th>Material</th>
-              <th>Cantidad</th>
-              <th>Costo</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Silicona A/B <div class="muted">(${mxn(COSTO_SILICONA_G)} / g)</div></td>
-              <td>${siliconaTotal_g.toFixed(2)} g <div class="muted">A: ${A_g.toFixed(2)} g · B: ${B_g.toFixed(2)} g</div></td>
-              <td>${mxn(costoSilicona)}</td>
-            </tr>
-            <tr>
-              <td>Slacker <div class="muted">(${mxn(COSTO_SLACKER_G)} / g)</div></td>
-              <td>${slacker_g.toFixed(2)} g</td>
-              <td>${mxn(costoSlacker)}</td>
-            </tr>
-            <tr>
-              <td>Glatzan</td>
-              <td>${GLATZAN_CANTIDAD_ML.toFixed(1)} ml</td>
-              <td>${mxn(costoGlatzan)}</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <div class="summary">
-          <div class="row">
-            <div class="k">Precio inicial (costo real)</div>
-            <div class="v">${mxn(costoTotal)}</div>
-          </div>
-
-          <div class="row">
-            <div class="k">Margen aplicado</div>
-            <div class="v">${(MARGEN_GANANCIA * 100).toFixed(0)}%</div>
-          </div>
-
-          <div class="bigPrice">
-            <div class="label">Precio sugerido de venta</div>
-            <div class="amount">${mxn(precioSugerido)}</div>
-          </div>
-
-          <div class="tiny">
-            Vender a este precio o menos resultará en una pérdida neta de su tiempo y esfuerzo. No acepte menos de lo que merece
-          </div>
-        </div>
-
-        <div class="nota" style="margin-top:12px;">
-          <b>Cálculo de mezcla (según tu fórmula):</b><br>
-          Molde Ultracal: ${pesoUltracalMoldeG.toFixed(2)} g<br>
-          Total (Silicona + Slacker) = ${pesoUltracalMoldeG.toFixed(2)} × 0.7 = ${totalMix_g.toFixed(2)} g<br>
-          Por parte (A, B, Slacker) = ${totalMix_g.toFixed(2)} ÷ 3 = ${porParte_g.toFixed(2)} g c/u
-        </div>
-      `;
-    }
-
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') calcularCosto();
-    });
-  </script>
 </body>
 </html>
